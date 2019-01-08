@@ -32,6 +32,9 @@ const person = {
     }
 };
 
+const copiedPerson = {...person};
+console.log(copiedPerson);
+
 // console.log(person);
 // person.greet();
 
@@ -42,7 +45,14 @@ const hobbies = ['Sports', 'Cooking'];
 
 // console.log(hobbies.map(hobby => 'Hobby: ' + hobby));
 // console.log(hobbies);
+// hobbies.push('Programming');
+// console.log(hobbies);
 
-hobbies.push('Programming');
+const copiedArray = [...hobbies];
+console.log(copiedArray);
 
-console.log(hobbies);
+const toArray = (...args) => {
+    return args;
+};
+
+console.log(toArray(1, 2, 3, 4));
