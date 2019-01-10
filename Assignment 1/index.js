@@ -6,7 +6,7 @@ const server = http.createServer((req, res) => {
         res.setHeader('Content-Type', 'text/html');
         res.write('<html>');
         res.write('<head><title>Assignment 1</title></head>');
-        res.write('<body><form><input action="/create-user" method="POST" type="text" name="username"><button type="submit">SEND</button></form></body>');
+        res.write('<body><form action="/create-user" method="POST" ><input type="text" name="username"><button type="submit">SEND</button></form></body>');
         res.write('</html>')
         res.end();
     }
@@ -21,6 +21,7 @@ const server = http.createServer((req, res) => {
     // Send an HTML response with "Page not Found"
     // If there is code here then you want to do return res.end(); above
     if(url === '/create-user') {
+        console.log(url);
         const body = [];
         req.on('data', chunk => {
             body.push(chunk);
