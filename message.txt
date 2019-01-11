@@ -1,5 +1,1 @@
-<<<<<<< HEAD
 adsf
-=======
-sssssss
->>>>>>> 0c46e2ecdb6402c66c44664dd6ac1dbb1b77aa3d
