@@ -52,4 +52,4 @@ const requestHandler = (request, response) => {
 
 // A different way to do multiple exports
 exports.handler = requestHandler;
-exports.someText = 'Some hard coded text';
+exports.someText = 'Some hard coded texts';
