@@ -1,0 +1,24 @@
+{
+  "name": "nodejs-course",
+  "version": "1.0.0",
+  "description": "Complete Node.js Guide",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js",
+    "start-server": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KennyStephens/nodejs-course.git"
+  },
+  "author": "Kenny Stephens",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/KennyStephens/nodejs-course/issues"
+  },
+  "homepage": "https://github.com/KennyStephens/nodejs-course#readme",
+  "devDependencies": {
+    "nodemon": "^1.18.9"
+  }
+}
