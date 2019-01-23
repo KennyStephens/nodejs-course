@@ -5,7 +5,7 @@
 <body>
     <%- include('../includes/navigation.ejs') %>
 
-    <main>
+    <main class="centered">
         <% if (prods.length > 0) { %>
             <div class="grid">
                 <% for (let product of prods) { %>
@@ -21,7 +21,7 @@
                             <h2 class="product__price">$<%= product.price %></h2>
                             <p class="product__description"><%= product.description %></p>
                         </div>
-                        <%- include('../includes/add-to-cart.ejs') %>
+                        <%- include('../includes/add-to-cart.ejs', {product: product}) %>
                     </article>
                 <% } %>
             </div>
