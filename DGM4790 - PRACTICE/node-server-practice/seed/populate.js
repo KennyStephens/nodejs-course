@@ -8,3 +8,5 @@ fetch('https://pokeapi.co/api/v2/pokemon/?limit=25')
     // console.log(myJson.results);
     const pokeArray = myJson.results;
   });
+
+  
