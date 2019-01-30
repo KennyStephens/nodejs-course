@@ -39,18 +39,15 @@ class Product {
 
   static findById(prodId) {
     const db = getDb();
-    return db
-      .collection('products')
-      .find({ _id: new mongodb.ObjectId(prodId) })
+    return db.collection('products')
+      .find({_id: new mongodb.ObjectId(prodId) })
       .next()
       .then(product => {
         console.log(product);
         return product;
       })
-      .catch(err => {
-        console.log(err);
-      });
-  }
+      .catch(err => console.log(err))
+  };
 }
 
 module.exports = Product;
