@@ -72,7 +72,7 @@ exports.postCart = (req, res, next) => {
     .then(result => {
       console.log(result);
       res.redirect('/cart');
-    })
+    });
 };
 
 exports.postCartDeleteProduct = (req, res, next) => {
@@ -97,7 +97,7 @@ exports.postOrder = (req, res, next) => {
 
 exports.getOrders = (req, res, next) => {
   req.user
-  .getOrders()
+    .getOrders()
     .then(orders => {
       res.render('shop/orders', {
         path: '/orders',
