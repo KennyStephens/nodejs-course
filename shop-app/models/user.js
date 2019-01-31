@@ -127,7 +127,7 @@ class User {
       .find({
         'user._id': new ObjectId(this._id)
       })
-    toArray();
+    .toArray();
   }
 
   static findById(userId) {
