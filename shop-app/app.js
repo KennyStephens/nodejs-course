@@ -15,13 +15,11 @@ app.set('views', 'views');
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 
-app.use(bodyParser.urlencoded({
-  extended: false
-}));
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use((req, res, next) => {
-  User.findById('5c537386ad70f408d705bab5')
+  User.findById('5bab316ce0a7c75f783cb8a8')
     .then(user => {
       req.user = user;
       next();
@@ -36,9 +34,8 @@ app.use(errorController.get404);
 
 mongoose
   .connect(
-    'mongodb+srv://kenkneesteefens:Nodecourse@cluster0-drydi.mongodb.net/shop?retryWrites=true', {
-      useNewUrlParser: true
-    })
+    'mongodb+srv://maximilian:9u4biljMQc4jjqbe@cluster0-ntrwp.mongodb.net/shop?retryWrites=true'
+  )
   .then(result => {
     User.findOne().then(user => {
       if (!user) {
