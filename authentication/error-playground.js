@@ -6,4 +6,10 @@ const sum = (a, b) => {
   
 };
 
-console.log(sum(1));
+try {
+  console.log(sum(1));
+} catch (error) {
+  console.log('Error occurred');
+  console.log(error);
+}
+
