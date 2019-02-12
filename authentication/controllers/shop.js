@@ -1,11 +1,11 @@
-const fs = require("fs");
-const path = require("path");
+const fs = require('fs');
+const path = require('path');
 
-const PDFDocument = require("pdfkit");
-var stripe = require("stripe")("sk_test_g5ZMlGp8sLr7oj1EhunWtnZL");
+const PDFDocument = require('pdfkit');
+const stripe = require('stripe')('sk_test_BMD9aaviqJzK0hlROg2KMRbD');
 
-const Product = require("../models/product");
-const Order = require("../models/order");
+const Product = require('../models/product');
+const Order = require('../models/order');
 
 const ITEMS_PER_PAGE = 2;
 
@@ -22,10 +22,10 @@ exports.getProducts = (req, res, next) => {
         .limit(ITEMS_PER_PAGE);
     })
     .then(products => {
-      res.render("shop/product-list", {
+      res.render('shop/product-list', {
         prods: products,
-        pageTitle: "Products",
-        path: "/products",
+        pageTitle: 'Products',
+        path: '/products',
         currentPage: page,
         hasNextPage: ITEMS_PER_PAGE * page < totalItems,
         hasPreviousPage: page > 1,
@@ -45,10 +45,10 @@ exports.getProduct = (req, res, next) => {
   const prodId = req.params.productId;
   Product.findById(prodId)
     .then(product => {
-      res.render("shop/product-detail", {
+      res.render('shop/product-detail', {
         product: product,
         pageTitle: product.title,
-        path: "/products"
+        path: '/products'
       });
     })
     .catch(err => {
@@ -71,10 +71,10 @@ exports.getIndex = (req, res, next) => {
         .limit(ITEMS_PER_PAGE);
     })
     .then(products => {
-      res.render("shop/index", {
+      res.render('shop/index', {
         prods: products,
-        pageTitle: "Shop",
-        path: "/",
+        pageTitle: 'Shop',
+        path: '/',
         currentPage: page,
         hasNextPage: ITEMS_PER_PAGE * page < totalItems,
         hasPreviousPage: page > 1,
@@ -92,13 +92,13 @@ exports.getIndex = (req, res, next) => {
 
 exports.getCart = (req, res, next) => {
   req.user
-    .populate("cart.items.productId")
+    .populate('cart.items.productId')
     .execPopulate()
     .then(user => {
       const products = user.cart.items;
-      res.render("shop/cart", {
-        path: "/cart",
-        pageTitle: "Your Cart",
+      res.render('shop/cart', {
+        path: '/cart',
+        pageTitle: 'Your Cart',
         products: products
       });
     })
@@ -117,7 +117,12 @@ exports.postCart = (req, res, next) => {
     })
     .then(result => {
       console.log(result);
-      res.redirect("/cart");
+      res.redirect('/cart');
+    })
+    .catch(err => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
     });
 };
 
@@ -126,7 +131,7 @@ exports.postCartDeleteProduct = (req, res, next) => {
   req.user
     .removeFromCart(prodId)
     .then(result => {
-      res.redirect("/cart");
+      res.redirect('/cart');
     })
     .catch(err => {
       const error = new Error(err);
@@ -137,7 +142,7 @@ exports.postCartDeleteProduct = (req, res, next) => {
 
 exports.getCheckout = (req, res, next) => {
   req.user
-    .populate("cart.items.productId")
+    .populate('cart.items.productId')
     .execPopulate()
     .then(user => {
       const products = user.cart.items;
@@ -145,9 +150,9 @@ exports.getCheckout = (req, res, next) => {
       products.forEach(p => {
         total += p.quantity * p.productId.price;
       });
-      res.render("shop/checkout", {
-        path: "/checkout",
-        pageTitle: "Checkout",
+      res.render('shop/checkout', {
+        path: '/checkout',
+        pageTitle: 'Checkout',
         products: products,
         totalSum: total
       });
@@ -166,19 +171,15 @@ exports.postOrder = (req, res, next) => {
   let totalSum = 0;
 
   req.user
-    .populate("cart.items.productId")
+    .populate('cart.items.productId')
     .execPopulate()
-    .then(user => {
+    .then(user => {  
       user.cart.items.forEach(p => {
-        totalSum += p.quantity * p.productId. price;
+        totalSum += p.quantity * p.productId.price;
       });
+
       const products = user.cart.items.map(i => {
-        return {
-          quantity: i.quantity,
-          product: {
-            ...i.productId._doc
-          }
-        };
+        return { quantity: i.quantity, product: { ...i.productId._doc } };
       });
       const order = new Order({
         user: {
@@ -190,17 +191,17 @@ exports.postOrder = (req, res, next) => {
       return order.save();
     })
     .then(result => {
-      const charge = await stripe.charges.create({
+      const charge = stripe.charges.create({
         amount: totalSum * 100,
-        currency: "usd",
-        description: "Demo Order",
+        currency: 'usd',
+        description: 'Demo Order',
         source: token,
-        metaData: {order_id: result._id}
+        metadata: { order_id: result._id.toString() }
       });
       return req.user.clearCart();
     })
     .then(() => {
-      res.redirect("/orders");
+      res.redirect('/orders');
     })
     .catch(err => {
       const error = new Error(err);
@@ -210,13 +211,11 @@ exports.postOrder = (req, res, next) => {
 };
 
 exports.getOrders = (req, res, next) => {
-  Order.find({
-    "user.userId": req.user._id
-  })
+  Order.find({ 'user.userId': req.user._id })
     .then(orders => {
-      res.render("shop/orders", {
-        path: "/orders",
-        pageTitle: "Your Orders",
+      res.render('shop/orders', {
+        path: '/orders',
+        pageTitle: 'Your Orders',
         orders: orders
       });
     })
@@ -232,28 +231,27 @@ exports.getInvoice = (req, res, next) => {
   Order.findById(orderId)
     .then(order => {
       if (!order) {
-        return next(new Error("No order found."));
+        return next(new Error('No order found.'));
       }
       if (order.user.userId.toString() !== req.user._id.toString()) {
-        return next(new Error("Unauthorized"));
+        return next(new Error('Unauthorized'));
       }
-      const invoiceName = "invoice-" + orderId + ".pdf";
-      const invoicePath = path.join("data", "invoices", invoiceName);
+      const invoiceName = 'invoice-' + orderId + '.pdf';
+      const invoicePath = path.join('data', 'invoices', invoiceName);
 
       const pdfDoc = new PDFDocument();
-      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader('Content-Type', 'application/pdf');
       res.setHeader(
-        "Content-Disposition",
+        'Content-Disposition',
         'inline; filename="' + invoiceName + '"'
       );
       pdfDoc.pipe(fs.createWriteStream(invoicePath));
       pdfDoc.pipe(res);
 
-      pdfDoc.fontSize(26).text("Invoice", {
+      pdfDoc.fontSize(26).text('Invoice', {
         underline: true
       });
-
-      pdfDoc.text("------------------------");
+      pdfDoc.text('-----------------------');
       let totalPrice = 0;
       order.products.forEach(prod => {
         totalPrice += prod.quantity * prod.product.price;
@@ -261,15 +259,15 @@ exports.getInvoice = (req, res, next) => {
           .fontSize(14)
           .text(
             prod.product.title +
-              " - " +
+              ' - ' +
               prod.quantity +
-              " x " +
-              "$" +
+              ' x ' +
+              '$' +
               prod.product.price
           );
       });
-      pdfDoc.text("-----");
-      pdfDoc.fontSize(20).text("Total Price: $" + totalPrice);
+      pdfDoc.text('---');
+      pdfDoc.fontSize(20).text('Total Price: $' + totalPrice);
 
       pdfDoc.end();
       // fs.readFile(invoicePath, (err, data) => {
