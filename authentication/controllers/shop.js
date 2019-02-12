@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 const PDFDocument = require("pdfkit");
+var stripe = require("stripe")("sk_test_g5ZMlGp8sLr7oj1EhunWtnZL");
 
 const Product = require("../models/product");
 const Order = require("../models/order");
@@ -19,7 +20,8 @@ exports.getProducts = (req, res, next) => {
       return Product.find()
         .skip((page - 1) * ITEMS_PER_PAGE)
         .limit(ITEMS_PER_PAGE);
-    }).then(products => {
+    })
+    .then(products => {
       res.render("shop/product-list", {
         prods: products,
         pageTitle: "Products",
@@ -67,7 +69,8 @@ exports.getIndex = (req, res, next) => {
       return Product.find()
         .skip((page - 1) * ITEMS_PER_PAGE)
         .limit(ITEMS_PER_PAGE);
-    }).then(products => {
+    })
+    .then(products => {
       res.render("shop/index", {
         prods: products,
         pageTitle: "Shop",
@@ -140,7 +143,7 @@ exports.getCheckout = (req, res, next) => {
       const products = user.cart.items;
       let total = 0;
       products.forEach(p => {
-        total += p.quantity * p.productId.price
+        total += p.quantity * p.productId.price;
       });
       res.render("shop/checkout", {
         path: "/checkout",
@@ -157,10 +160,18 @@ exports.getCheckout = (req, res, next) => {
 };
 
 exports.postOrder = (req, res, next) => {
+  // Token is created using Checkout or Elements!
+  // Get the payment token ID submitted by the form:
+  const token = req.body.stripeToken; // Using Express
+  let totalSum = 0;
+
   req.user
     .populate("cart.items.productId")
     .execPopulate()
     .then(user => {
+      user.cart.items.forEach(p => {
+        totalSum += p.quantity * p.productId. price;
+      });
       const products = user.cart.items.map(i => {
         return {
           quantity: i.quantity,
@@ -179,6 +190,13 @@ exports.postOrder = (req, res, next) => {
       return order.save();
     })
     .then(result => {
+      const charge = await stripe.charges.create({
+        amount: totalSum * 100,
+        currency: "usd",
+        description: "Demo Order",
+        source: token,
+        metaData: {order_id: result._id}
+      });
       return req.user.clearCart();
     })
     .then(() => {
