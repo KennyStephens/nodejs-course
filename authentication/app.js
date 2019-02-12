@@ -28,7 +28,7 @@ const fileStorage = multer.diskStorage({
     cb(null, 'images')
   },
   filename: (req, file, cb) => {
-    cb(null, new Date().toISOString() + '-' + file.originalname);
+    cb(null, Date.now() + '-' + file.originalname);
   }
 });
 
@@ -95,10 +95,11 @@ app.use(errorController.get404);
 
 app.use((error, req, res, next) => {
   // res.redirect('/500');
+	console.log(error)
   res.status(500).render('500', {
     pageTitle: 'Error!',
     path: '/500',
-    isAuthenticated: req.session.isLoggedIn
+    isAuthenticated: false
   });
 });
 
