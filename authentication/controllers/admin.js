@@ -1,7 +1,10 @@
 const mongoose = require('mongoose');
+const fileHelper = require('../util/file');
 
 const Product = require('../models/product');
-const { validationResult} = require('express-validator/check');
+const {
+  validationResult
+} = require('express-validator/check');
 
 exports.getAddProduct = (req, res, next) => {
   res.render('admin/edit-product', {
@@ -19,7 +22,7 @@ exports.postAddProduct = (req, res, next) => {
   const image = req.file;
   const price = req.body.price;
   const description = req.body.description;
-  if(!image) {
+  if (!image) {
     return res.status(422).render('admin/edit-product', {
       pageTitle: 'Add Product',
       path: '/admin/add-product',
@@ -39,7 +42,7 @@ exports.postAddProduct = (req, res, next) => {
 
   const errors = validationResult(req);
 
-  if(!errors.isEmpty()) {
+  if (!errors.isEmpty()) {
     return res.status(422).render('admin/edit-product', {
       pageTitle: 'Add Product',
       path: '/admin/add-product',
@@ -52,7 +55,7 @@ exports.postAddProduct = (req, res, next) => {
       },
       errorMessage: errors.array()[0].msg,
       validationErrors: errors.array()
-      
+
     });
   }
 
@@ -85,7 +88,7 @@ exports.postAddProduct = (req, res, next) => {
       //   },
       //   errorMessage: 'Database operation failed. Please try again.',
       //   validationErrors: []
-        
+
       // });
       // res.redirect('/500');
       const error = new Error(err);
@@ -131,7 +134,7 @@ exports.postEditProduct = (req, res, next) => {
 
   const errors = validationResult(req);
 
-  if(!errors.isEmpty()) {
+  if (!errors.isEmpty()) {
     return res.status(422).render('admin/edit-product', {
       pageTitle: 'Edit Product',
       path: '/admin/edit-product',
@@ -145,19 +148,20 @@ exports.postEditProduct = (req, res, next) => {
       },
       errorMessage: errors.array()[0].msg,
       validationErrors: errors.array()
-      
+
     });
   }
 
   Product.findById(prodId)
     .then(product => {
-      if(product.userId.toString() !== req.user._id.toString()) {
+      if (product.userId.toString() !== req.user._id.toString()) {
         return res.redirect('/');
       }
       product.title = updatedTitle;
       product.price = updatedPrice;
       product.description = updatedDesc;
-      if(image) {
+      if (image) {
+        fileHelper.deleteFile(product.imageUrl);
         product.imageUrl = image.path;
       }
       return product.save().then(result => {
@@ -173,7 +177,9 @@ exports.postEditProduct = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
-  Product.find({userId: req.user._id})
+  Product.find({
+      userId: req.user._id
+    })
     // .select('title price -_id')
     // .populate('userId', 'name')
     .then(products => {
@@ -193,7 +199,17 @@ exports.getProducts = (req, res, next) => {
 
 exports.postDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
-  Product.deleteOne({_id: prodId, userId: req.user._id})
+  Product.findById(prodId)
+    .then(product => {
+      if (!product) {
+        return next(new Error('Product not found.'));
+      }
+      fileHelper.deleteFile(product.imageUrl);
+      return Product.deleteOne({
+        _id: prodId,
+        userId: req.user._id
+      })
+    })
     .then(() => {
       console.log('DESTROYED PRODUCT');
       res.redirect('/admin/products');
