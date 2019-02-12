@@ -25,8 +25,6 @@ router.post('/add-product', isAuth, [
     min: 3
   })
   .trim(),
-  body('imageUrl')
-  .isURL(),
   body('price')
   .isFloat(),
   body('description')
