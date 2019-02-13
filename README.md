@@ -1,5 +1,4 @@
 ## Here is what I learned:
-**Here's what you'll learn in this course:**
 
 - Node.js Basics & Basic Core Modules
 
