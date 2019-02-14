@@ -1,23 +1,38 @@
 const fs = require('fs');
 const path = require('path');
 
-const { validationResult } = require('express-validator/check');
+const {
+  validationResult
+} = require('express-validator/check');
 
 const Post = require('../models/post');
 
 exports.getPosts = (req, res, next) => {
-  Post.find()
+  const currentPage = req.query.page || 1;
+  const perPage = 2;
+  let totalItems;
+  Post.find().countDocuments()
+    .then(count => {
+      totalItems = count;
+      return Post.find()
+      .skip((currentPage - 1) * perPage)
+      .limit(perPage);
+    })
     .then(posts => {
       res
         .status(200)
-        .json({ message: 'Fetched posts successfully.', posts: posts });
+        .json({
+          message: 'Fetched posts successfully.',
+          posts: posts,
+          totalItems: totalItems
+        });
     })
     .catch(err => {
       if (!err.statusCode) {
         err.statusCode = 500;
       }
       next(err);
-    });
+    })
 };
 
 exports.createPost = (req, res, next) => {
@@ -27,7 +42,7 @@ exports.createPost = (req, res, next) => {
     error.statusCode = 422;
     throw error;
   }
-  if(!req.file) {
+  if (!req.file) {
     const error = new Error('No image provided');
     error.statusCode = 422;
     throw error;
@@ -39,7 +54,9 @@ exports.createPost = (req, res, next) => {
     title: title,
     content: content,
     imageUrl: imageUrl,
-    creator: { name: 'Maximilian' }
+    creator: {
+      name: 'Maximilian'
+    }
   });
   post
     .save()
@@ -66,7 +83,10 @@ exports.getPost = (req, res, next) => {
         error.statusCode = 404;
         throw error;
       }
-      res.status(200).json({ message: 'Post fetched.', post: post });
+      res.status(200).json({
+        message: 'Post fetched.',
+        post: post
+      });
     })
     .catch(err => {
       if (!err.statusCode) {
@@ -87,10 +107,10 @@ exports.updatePost = (req, res, next) => {
   const title = req.body.title;
   const content = req.body.content;
   let imageUrl = req.body.image;
-  if(req.file) {
+  if (req.file) {
     imageUrl = req.file.path;
   }
-  if(!imageUrl) {
+  if (!imageUrl) {
     const error = new Error('No file picked.');
     error.statusCode = 422;
     throw error;
@@ -102,7 +122,7 @@ exports.updatePost = (req, res, next) => {
         error.statusCode = 404;
         throw error;
       }
-      if(imageUrl !== post.imageUrl) {
+      if (imageUrl !== post.imageUrl) {
         clearImage(post.imageUrl);
       }
       post.title = title;
@@ -111,7 +131,10 @@ exports.updatePost = (req, res, next) => {
       return post.save();
     })
     .then(result => {
-      res.status(200).json({message: 'Post updated!', post: result})
+      res.status(200).json({
+        message: 'Post updated!',
+        post: result
+      })
     })
     .catch(err => {
       if (!err.statusCode) {
@@ -136,7 +159,9 @@ exports.deletePost = (req, res, next) => {
     })
     .then(result => {
       console.log(result);
-      res.status(200).json({message: 'Deleted Post.'});
+      res.status(200).json({
+        message: 'Deleted Post.'
+      });
     })
     .catch(err => {
       if (!err.statusCode) {
