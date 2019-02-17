@@ -4,9 +4,10 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const multer = require('multer');
+const graphqlHttp = require('express-graphql');
 
-const feedRoutes = require('./routes/feed');
-const authRoutes = require('./routes/auth');
+const graphqlSchema = require('./graphql/schema');
+const graphqlResolver = require('./graphql/resolvers');
 
 const app = express();
 
@@ -34,7 +35,10 @@ const fileFilter = (req, file, cb) => {
 // app.use(bodyParser.urlencoded()); // x-www-form-urlencoded <form>
 app.use(bodyParser.json()); // application/json
 app.use(
-  multer({ storage: fileStorage, fileFilter: fileFilter }).single('image')
+  multer({
+    storage: fileStorage,
+    fileFilter: fileFilter
+  }).single('image')
 );
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
@@ -48,27 +52,29 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/feed', feedRoutes);
-app.use('/auth', authRoutes);
+app.use('/graphql', graphqlHttp({
+  schema: graphqlSchema,
+  rootValue: graphqlResolver
+}));
 
 app.use((error, req, res, next) => {
   console.log(error);
   const status = error.statusCode || 500;
   const message = error.message;
   const data = error.data;
-  res.status(status).json({ message: message, data: data });
+  res.status(status).json({
+    message: message,
+    data: data
+  });
 });
 
 mongoose
   .connect(
-    'mongodb+srv://kenkneesteefens:Nodecourse@cluster0-drydi.mongodb.net/messages', { useNewUrlParser: true }
+    'mongodb+srv://kenkneesteefens:Nodecourse@cluster0-drydi.mongodb.net/messages', {
+      useNewUrlParser: true
+    }
   )
   .then(result => {
-    const server = app.listen(8080);
-    const io = require('./socket').init(server);
-    io.on('connection', socket => {
-      console.log('Client Connected');
-    });
-
+    app.listen(8080);
   })
   .catch(err => console.log(err));
