@@ -20,9 +20,7 @@ const User = require("./models/user");
 
 console.log(process.env.NODE_ENV, "node_env");
 
-const MONGODB_URI = `mongodb+srv://${process.env.MONGO_USER}:${
-  process.env.MONGO_PASSWORD
-}@cluster0-drydi.mongodb.net/${process.env.MONGO_DEFAULT_DATABASE}`;
+const MONGODB_URI = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0-drydi.mongodb.net/${process.env.MONGO_DEFAULT_DATABASE}`;
 
 console.log(MONGODB_URI);
 
